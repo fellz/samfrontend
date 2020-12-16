@@ -58,8 +58,8 @@
   (reset! response-data {:message (str "Ошибка: " (:status-text resp))}))
 
 ;; Controllers
-;;(def req-url "https://sambackend.herokuapp.com/")
-(def req-url "http://localhost:3000/")
+(def req-url "https://sambackend.herokuapp.com/")
+;;(def req-url "http://localhost:3000/")
 
 (defn make-req [m pars requrl handler]
   (ajax/ajax-request
