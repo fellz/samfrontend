@@ -58,10 +58,10 @@
   (reset! response-data {:message (str "Ошибка: " (:status-text resp))}))
 
 ;; Controllers
-
+(def req-url "https://sambackend.herokuapp.com/")
 
 (defn get-all-patients []
-  (ajax/GET "http://localhost:3000/"
+  (ajax/GET req-url 
    {:handler (fn [resp]  (reset! patients-data resp))
     :error-handler err-handler
     :format (ajax/json-request-format)
@@ -69,7 +69,7 @@
     :keywords? true}))
 
 (defn create-patient [data]
-  (ajax/POST "http://127.0.0.1:3000/"
+  (ajax/POST req-url 
     {:params data
     :handler (fn [resp]
                (reset! response-data {:message (str "Успешно!")})
@@ -81,7 +81,7 @@
 
 (defn update-patient [data]
   (let [id (:id data)
-        url (str "http://localhost:3000/" id)
+        url (str req-url id)
         data-wo-id (dissoc data :id)]
     (ajax/PUT url
       {:params data-wo-id
@@ -92,7 +92,7 @@
        :keywords? true})))
 
 (defn delete-patient [id]
-  (let [url (str "http://localhost:3000/" id)]
+  (let [url (str req-url id)]
     (ajax/DELETE url
      {:handler (fn [resp]
                  (reset! response-data {:message (str "Успешно!")})
