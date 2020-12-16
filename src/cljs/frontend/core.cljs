@@ -58,49 +58,39 @@
   (reset! response-data {:message (str "Ошибка: " (:status-text resp))}))
 
 ;; Controllers
-(def req-url "https://sambackend.herokuapp.com/")
+;;(def req-url "https://sambackend.herokuapp.com/")
+(def req-url "http://localhost:3000/")
+
+(defn make-req [m pars requrl handler]
+  (ajax/ajax-request
+            {:uri requrl
+             :method m
+             :handler handler
+             :params pars
+             :error-handler err-handler
+             :format (ajax/json-request-format)
+             :response-format (ajax/json-response-format {:keywords? true})
+             }))
 
 (defn get-all-patients []
-  (ajax/GET req-url 
-   {:handler (fn [resp]  (reset! patients-data resp))
-    :error-handler err-handler
-    :format (ajax/json-request-format)
-    :response-format :json
-    :keywords? true}))
+  (make-req :get nil req-url (fn [[ok resp]]  (reset! patients-data resp)) ))
 
 (defn create-patient [data]
-  (ajax/POST req-url 
-    {:params data
-    :handler (fn [resp]
-               (reset! response-data {:message (str "Успешно!")})
-               (accountant/navigate! (path-for :index)))
-    :error-handler err-handler
-    :format (ajax/json-request-format)
-     :response-format :json
-     :keywords? true}))
+  (make-req :post data req-url (fn [resp]
+                          (reset! response-data {:message (str "Успешно!")})
+                          (accountant/navigate! (path-for :index)))))
 
 (defn update-patient [data]
   (let [id (:id data)
         url (str req-url id)
         data-wo-id (dissoc data :id)]
-    (ajax/PUT url
-      {:params data-wo-id
-       :handler (fn [resp] (reset! response-data {:message (str "Успешно!")}))
-       :error-handler err-handler
-       :format (ajax/json-request-format)
-       :response-format :json
-       :keywords? true})))
+    (make-req :put data-wo-id url (fn [resp] (reset! response-data {:message (str "Успешно!")})))))
 
 (defn delete-patient [id]
   (let [url (str req-url id)]
-    (ajax/DELETE url
-     {:handler (fn [resp]
-                 (reset! response-data {:message (str "Успешно!")})
-                 (accountant/navigate! (path-for :index)))
-      :error-handler err-handler
-      :format (ajax/json-request-format)
-      :response-format :json
-      :keywords? true})))
+    (make-req :delete nil url (fn [resp]
+                            (reset! response-data {:message (str "Успешно!")})
+                            (accountant/navigate! (path-for :index))))))
 
 
 ;; Views
