@@ -55,6 +55,7 @@
    [:h3 {:style {:color "red"}} (:message @response-data)]])
 
 (defn err-handler [resp]
+  (println resp)
   (reset! response-data {:message (str "Ошибка: " (:status-text resp))}))
 
 ;; Controllers
@@ -76,15 +77,20 @@
   (make-req :get nil req-url (fn [[ok resp]]  (reset! patients-data resp)) ))
 
 (defn create-patient [data]
-  (make-req :post data req-url (fn [resp]
-                          (reset! response-data {:message (str "Успешно!")})
-                          (accountant/navigate! (path-for :index)))))
+  (make-req :post data req-url (fn [[ok resp]]
+                                 (if ok
+                                   (reset! response-data {:message (str "Успешно!")})
+                                   (reset! response-data {:message (:status-text resp)}))
+                                 (reset! pdata nil) ;; clear pdata
+                                 (accountant/navigate! (path-for :index)))))
 
 (defn update-patient [data]
   (let [id (:id data)
         url (str req-url id)
         data-wo-id (dissoc data :id)]
-    (make-req :put data-wo-id url (fn [resp] (reset! response-data {:message (str "Успешно!")})))))
+    (make-req :put data-wo-id url (fn [resp]
+                                    (reset! pdata nil)
+                                    (reset! response-data {:message (str "Успешно!")})))))
 
 (defn delete-patient [id]
   (let [url (str req-url id)]
